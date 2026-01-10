@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>INPT | Gestion des Stages</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <section id="auth-overlay">
+        <div class="auth-card">
+            <div class="auth-left">
+                <div class="overlay-content">
+                    <h2>INPT Internship Portal</h2>
+                    <p>Propulsez votre carrière au sein de nos entreprises partenaires.</p>
+                </div>
+            </div>
+            <div class="auth-right">
+                <form id="main-login-form">
+                    <div class="auth-header">
+                        <h1>Bienvenue</h1>
+                        <p>Connectez-vous à votre espace</p>
+                    </div>
+                    <div class="input-field">
+                        <label>Identifiant (CIN)</label>
+                        <input type="text" id="auth-id" placeholder="Ex: AB123456" required>
+                    </div>
+                    <div class="input-field">
+                        <label>Mot de passe</label>
+                        <input type="password" id="auth-password" placeholder="••••••••" required>
+                    </div>
+                    <div class="input-field">
+                        <label>Type d'utilisateur</label>
+                        <select id="auth-role">
+                            <option value="student">Étudiant</option>
+                            <option value="company">Entreprise</option>
+                            <option value="admin">Administration</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn-auth">Entrer sur le portail</button>
+                </form>
+            </div>
+        </div>
+    </section>
+
+    <aside class="sidebar">
+        <div class="brand">
+            <div class="logo-box">INPT</div>
+            <span>Internship Hub</span>
+        </div>
+        
+        <nav class="menu">
+            <p class="menu-label student-only">Menu Principal</p>
+            <a href="#" class="nav-link active student-only" data-target="offres">🔍 Explorer les Offres</a>
+            <a href="#" class="nav-link student-only" data-target="candidature">📁 Ma Candidature</a>
+            <a href="#" class="nav-link student-only" data-target="rapport">📤 Déposer Rapport</a>
+    
+            <p class="menu-label company-only">Espace Recruteur</p>
+            <a href="#" class="nav-link company-only" data-target="entreprise">➕ Publier une Offre</a>
+            <a href="#" class="nav-link company-only" data-target="mes-offres">📋 Mes Offres</a>
+            <a href="#" class="nav-link company-only" data-target="candidats-recus">👥 Candidatures Reçues</a>
+    
+            <p class="menu-label admin-only">Gestion Admin</p>
+            <a href="#" class="nav-link admin-only" data-target="admin-stats">📊 Tableau de Bord</a>
+            <a href="#" class="nav-link admin-only" data-target="admin-etudiants">🎓 Suivi Étudiants</a>
+            <a href="#" class="nav-link admin-only" data-target="admin-conventions">📝 Conventions</a>
+        </nav>
+
+        <div class="user-card">
+            <div class="avatar">AN</div>
+            <div class="user-info">
+                <p class="name">Anas Naji</p>
+                <p class="role">Étudiant ASEDS</p>
+            </div>
+        </div>
+        <button id="logout-btn" class="logout-link">
+            <span>🚪 Déconnexion</span>
+        </button>
+    </aside>
+
+    <main class="content">
+        
+        <section id="offres" class="view">
+            <div class="page-header">
+                <div class="header-text">
+                    <h1>Explorer les Offres</h1>
+                    <p>Trouvez le stage qui correspond à votre <span class="keyword-highlight">projet professionnel</span>.</p>
+                </div>
+                <div class="header-badge">Promotion INPT</div>
+            </div>
+            
+            <div class="filters">
+                <input type="text" placeholder="🔍 Rechercher un domaine (Cloud, Data, Sécurité...)">
+                <select>
+                    <option value="">✨ Toutes les filières</option>
+                    <option>Cybersécurité</option>
+                    <option>Data Engineering</option>
+                    <option>ASEDS</option>
+                    <option>AMOA</option>
+                </select>
+            </div>
+            <div class="grid-offers" id="offers-list"></div>
+        </section>
+
+        <section id="candidature" class="view">
+            <div class="page-header">
+                <div class="header-text">
+                    <h1>Ma Candidature</h1>
+                    <p>Remplissez les informations pour valider votre <span class="keyword-highlight">dossier de stage</span>.</p>
+                </div>
+                <div class="header-badge" id="btn-dossier-info" style="cursor: pointer;">📥 GÉNÉRER PDF</div>
+            </div>
+            <div id="candidature-container"></div>
+        </section>
+
+        <section id="rapport" class="view">
+            <div class="page-header">
+                <div class="header-text">
+                    <h1>Dépôt du Rapport Final</h1>
+                    <p>Veuillez soumettre votre <span class="keyword-highlight">livrable PDF</span> avant l'échéance.</p>
+                </div>
+                <div class="header-badge">Date limite: Juin 2026</div>
+            </div>
+            <div class="upload-zone" id="drop-zone">
+                <div class="upload-icon">📄</div>
+                <h3>Glissez votre rapport ici</h3>
+                <p>ou cliquez pour parcourir vos fichiers (Max 10Mo)</p>
+                <input type="file" id="file-input" hidden>
+            </div>
+            <button class="btn-submit btn-submit-premium"> 🚀 Valider la soumission
+            </button>
+        </section>
+
+        <section id="entreprise" class="view">
+            <div class="page-header">
+                <div class="header-text">
+                    <h1>Espace Recruteur</h1>
+                    <p>Diffusez vos <span class="keyword-highlight">opportunités</span> auprès de nos ingénieurs.</p>
+                </div>
+                <div class="header-badge">Nouvelle Offre</div>
+            </div>
+            <div id="entreprise-container"></div>
+        </section>
+
+        <section id="mes-offres" class="view">
+            <div class="page-header">
+                <div class="header-text">
+                    <h1>Mes Offres Publiées</h1>
+                    <p>Suivez l'état de vos <span class="keyword-highlight">annonces actives</span>.</p>
+                </div>
+                <div class="header-badge">Gestion</div>
+            </div>
+            <div id="mes-offres-container" class="grid-offers"></div>
+        </section>
+
+        <section id="candidats-recus" class="view">
+            <div class="page-header">
+                <div class="header-text">
+                    <h1>Candidatures Reçues</h1>
+                    <p>Analysez les profils des <span class="keyword-highlight">candidats postulants</span>.</p>
+                </div>
+                <div class="header-badge">Recrutement</div>
+            </div>
+            <div class="data-card">
+                <table class="modern-table">
+                    <thead>
+                        <tr>
+                            <th>Étudiant</th>
+                            <th>Filière</th>
+                            <th>Offre</th>
+                            <th>Date</th>
+                            <th style="text-align: right;">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="candidats-tbody"></tbody>
+                </table>
+            </div>
+        </section>
+
+        <section id="admin-stats" class="view">
+            <div class="page-header">
+                <div class="header-text">
+                    <h1>Tableau de Bord</h1>
+                    <p>Statistiques de la <span class="keyword-highlight">promotion actuelle</span>.</p>
+                </div>
+                <div class="header-badge">Stats Globales</div>
+            </div>
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon" style="background: #f5f3ff; color: #8b5cf6;">👥</div>
+                    <div class="stat-details">
+                        <p class="stat-label">Étudiants Inscrits</p>
+                        <h3 class="stat-number">150</h3>
+                        <span class="stat-trend positive">↑ 12% vs 2025</span>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon" style="background: #ECFDF5; color: #10B981;">💼</div>
+                    <div class="stat-details">
+                        <p class="stat-label">Stages Trouvés</p>
+                        <h3 class="stat-number">85</h3>
+                        <div class="progress-bar-bg">
+                            <div class="progress-bar-fill" style="width: 56%;"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon" style="background: #FFF7ED; color: #F59E0B;">📄</div>
+                    <div class="stat-details">
+                        <p class="stat-label">Conventions</p>
+                        <h3 class="stat-number">12</h3>
+                        <p class="stat-sub">En attente de signature</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="admin-etudiants" class="view">
+            <div class="page-header">
+                <div class="header-text">
+                    <h1>Suivi des Étudiants</h1>
+                    <p>Évaluation et <span class="keyword-highlight">validation académique</span>.</p>
+                </div>
+                <div class="header-badge">Académique</div>
+            </div>
+            <div class="data-card">
+                <table class="modern-table">
+                    <thead>
+                        <tr>
+                            <th>Étudiant</th>
+                            <th>Filière</th>
+                            <th>Entreprise</th>
+                            <th>Statut</th>
+                            <th>Note /20</th>
+                        </tr>
+                    </thead>
+                    <tbody id="admin-students-tbody"></tbody>
+                </table>
+            </div>
+        </section>
+
+        <section id="admin-conventions" class="view">
+            <div class="page-header">
+                <div class="header-text">
+                    <h1>Gestion des Conventions</h1>
+                    <p>Signature des <span class="keyword-highlight">accords officiels</span>.</p>
+                </div>
+                <div class="header-badge">Administration</div>
+            </div>
+            <div class="data-card">
+                <table class="modern-table">
+                    <thead>
+                        <tr>
+                            <th>Étudiant</th>
+                            <th>Entreprise</th>
+                            <th>Document</th>
+                            <th>Statut</th>
+                            <th style="text-align: right;">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="admin-conventions-tbody"></tbody>
+                </table>
+            </div>
+        </section>
+    </main>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
