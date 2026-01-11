@@ -1,26 +1,26 @@
-let currentUser = null; // Elle doit être TOUT EN HAUT pour être accessible partout
-let offers = []; // On crée une liste vide qui accueillera les données du serveur
+let currentUser = null; 
+let offers = []; 
 async function fetchOffers() {
     try {
         const response = await fetch('http://localhost:3000/api/offers');
         const data = await response.json();
-        offers = data; // On remplit notre variable avec les vraies données de MySQL
-        displayOffers(); // On appelle ton affichage original
+        offers = data; 
+        displayOffers(); 
     } catch (error) {
         console.error("Erreur serveur:", error);
     }
 }
 
-// 1. Navigation entre les vues
+
 document.querySelectorAll('.nav-link').forEach(link => {
     link.addEventListener('click', function(e) {
         e.preventDefault();
         
-        // Gérer les classes actives sur le menu
+        
         document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
         this.classList.add('active');
         
-        // Cacher toutes les sections et afficher la bonne
+        
         const target = this.getAttribute('data-target');
         document.querySelectorAll('.view').forEach(view => view.classList.remove('active'));
         
@@ -29,7 +29,7 @@ document.querySelectorAll('.nav-link').forEach(link => {
             targetSection.classList.add('active');
         }
 
-        // --- DÉCLENCHEURS DE CONTENU ---
+        
         if (target === 'mes-offres') {
             displayMyOffers();
         } 
@@ -52,11 +52,11 @@ document.querySelectorAll('.nav-link').forEach(link => {
     });
 });
 
-// 2. Générer les offres de stage
+
 function displayOffers(searchTerm = "") {
     const list = document.getElementById('offers-list');
     
-    // On filtre les données avant de les afficher
+    
     const filteredOffers = offers.filter(off => 
         off.title.toLowerCase().includes(searchTerm.toLowerCase()) || 
         off.company_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -78,23 +78,23 @@ function displayOffers(searchTerm = "") {
     `).join('');
 }
 
-// 3. Simuler le clic sur l'upload
-// --- GESTION DU DÉPÔT DE RAPPORT ---
+
+
 const dropZone = document.getElementById('drop-zone');
 const fileInput = document.getElementById('file-input');
 const btnSubmit = document.querySelector('.btn-submit-premium');
 
-// Ouvrir l'explorateur de fichiers au clic
+
 if(dropZone) dropZone.addEventListener('click', () => fileInput.click());
 
-// Gérer le changement de fichier (sélection manuelle)
+
 if(fileInput) fileInput.addEventListener('change', function() {
     if (this.files.length > 0) {
         updateDropZoneVisual(this.files[0].name);
     }
 });
 
-// Gérer le Drag & Drop
+
 if(dropZone) {
     ['dragover', 'dragleave', 'drop'].forEach(eventName => {
         dropZone.addEventListener(eventName, (e) => e.preventDefault());
@@ -103,13 +103,13 @@ if(dropZone) {
     dropZone.addEventListener('drop', (e) => {
         const files = e.dataTransfer.files;
         if (files.length > 0) {
-            fileInput.files = files; // Lie le fichier déposé à l'input
+            fileInput.files = files; 
             updateDropZoneVisual(files[0].name);
         }
     });
 }
 
-// Fonction pour changer l'apparence une fois le fichier reçu
+
 function updateDropZoneVisual(fileName) {
     dropZone.innerHTML = `
         <div class="upload-icon" style="color: #10b981;">✅</div>
@@ -122,19 +122,19 @@ if(btnSubmit) {
         if (fileInput.files.length > 0) {
             const fileName = fileInput.files[0].name;
             
-            // Simulation du signal d'envoi
+            
             alert("Signal envoyé : Le rapport '" + fileName + "' a été transmis avec succès à l'administration.");
             
-            // Réinitialisation visuelle
+            
             window.location.reload(); 
         } else {
             alert("Erreur : Veuillez d'abord sélectionner un fichier PDF.");
         }
     });
 }
-// Initialisation
+
 document.addEventListener('DOMContentLoaded', () => {
-   fetchOffers(); // On demande au serveur les offres dès que la page est prête
+   fetchOffers(); 
     const loginForm = document.getElementById('main-login-form');
     const authOverlay = document.getElementById('auth-overlay');
 
@@ -145,7 +145,7 @@ if(loginForm) {
         e.preventDefault();
         
         const id = document.getElementById('auth-id').value;
-        const password = document.getElementById('auth-password')?.value || "ocp2026"; // Utilise ton champ password
+        const password = document.getElementById('auth-password')?.value || "ocp2026"; 
 
         try {
             const response = await fetch('http://localhost:3000/api/login', {
@@ -157,7 +157,7 @@ if(loginForm) {
             const data = await response.json();
 
             if (data.success) {
-                currentUser = data.user; // On stocke les vraies infos (ex: OCP Group, ID: 2)
+                currentUser = data.user; 
             
                 authOverlay.classList.add('fade-out');
                 document.querySelector('.user-info .name').innerText = currentUser.full_name;
@@ -165,7 +165,7 @@ if(loginForm) {
 
                 filterSidebar(currentUser.role);
                 
-                // Redirection selon le rôle
+                
                 document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
                 if (currentUser.role === 'admin') {
                     document.getElementById('admin-stats').classList.add('active');
@@ -176,7 +176,7 @@ if(loginForm) {
                     document.getElementById('offres').classList.add('active');
                 }
             } else {
-                alert(data.message); // Affiche "Identifiant ou mot de passe incorrect"
+                alert(data.message); 
             }
         } catch (error) {
             alert("Erreur de connexion au serveur.");
@@ -184,7 +184,7 @@ if(loginForm) {
     });
 }
 
-    // Gestion de la déconnexion
+    
     const logoutBtn = document.getElementById('logout-btn');
     logoutBtn.addEventListener('click', () => {
         authOverlay.classList.remove('fade-out');
@@ -242,7 +242,7 @@ function displayCandidatureForm(offerId) {
     document.getElementById('application-form').addEventListener('submit', async (e) => {
         e.preventDefault();
         
-        // On vérifie que currentUser existe bien avant d'envoyer
+        
         if (!currentUser) {
             alert("Erreur : Vous devez être connecté pour postuler.");
             return;
@@ -250,9 +250,9 @@ function displayCandidatureForm(offerId) {
 
         const applicationData = {
             offer_id: offerId,
-            student_id: currentUser.id, // On utilise l'ID réel de l'étudiant (ex: 3)
+            student_id: currentUser.id, 
             cv_url: document.getElementById('cv-link').value,
-            motivation_text: document.getElementById('motivation-text').value // Correspond à MySQL
+            motivation_text: document.getElementById('motivation-text').value 
         };
 
         try {
@@ -304,7 +304,7 @@ function displayCompanyForm() {
         </div>
     `;
 
-    // Écouter la soumission du formulaire
+    
     document.getElementById('job-offer-form').addEventListener('submit', async (e) => {
         e.preventDefault();
         if (!currentUser) {
@@ -317,8 +317,8 @@ function displayCompanyForm() {
             type: document.getElementById('pub-type').value,
             filiere: document.getElementById('pub-filiere').value,
             description: document.getElementById('pub-desc').value,
-            company_name: currentUser.full_name, // Nom dynamique
-            company_id: currentUser.id          // ID dynamique (ex: 8)
+            company_name: currentUser.full_name, 
+            company_id: currentUser.id          
         };
 
         try {
@@ -330,7 +330,7 @@ function displayCompanyForm() {
 
             if (response.ok) {
                 const result = await response.json();
-                alert("✅ " + result.message); // Affiche "Offre publiée avec succès !"
+                alert("✅ " + result.message); 
                 window.location.reload(); 
             }
         } catch (error) {
@@ -344,7 +344,7 @@ function displayMyOffers() {
     const container = document.getElementById('mes-offres-container');
     if (!container) return;
 
-    // On filtre la liste globale pour ne garder que les offres de l'entreprise actuelle
+    
     const currentCompanyName = document.querySelector('.user-info .name').innerText;
     const myPublishedOffers = offers.filter(off => off.company_name === currentCompanyName);
 
@@ -352,7 +352,7 @@ function displayMyOffers() {
         container.innerHTML = "<p style='color: var(--text-muted);'>Vous n'avez pas encore publié d'offres.</p>";
         return;
     }
-    // Dans displayMyOffers, à l'intérieur du .map() :
+    
     container.innerHTML = myPublishedOffers.map(off => `
         <div class="offer-card">
             <span class="badge">${off.type}</span>
@@ -365,18 +365,18 @@ function displayMyOffers() {
 
 }
 window.editOffer = function(offerData) {
-    // 1. On change de vue vers le formulaire de l'entreprise
+    
     document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
     document.getElementById('entreprise').classList.add('active');
     
-    // 2. On met à jour visuellement la sidebar
+    
     document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
     document.querySelector('[data-target="entreprise"]').classList.add('active');
 
-    // 3. On affiche le formulaire vierge
+    
     displayCompanyForm();
 
-    // 4. On attend un court instant que le formulaire soit dessiné pour le remplir
+    
     setTimeout(() => {
         const form = document.getElementById('job-offer-form');
         if (form) {
@@ -384,7 +384,7 @@ window.editOffer = function(offerData) {
             form.querySelector('select').value = offerData.type;
             form.querySelector('textarea').value = offerData.desc || "";
             
-            // On change le texte du bouton pour montrer qu'on modifie
+            
             const submitBtn = form.querySelector('.btn-publish');
             if(submitBtn) {
                 submitBtn.innerHTML = "💾 Enregistrer les modifications";
@@ -427,24 +427,22 @@ window.acceptApplication = function(appId) {
     const row = document.getElementById(`row-app-${appId}`);
     const actionCell = row.querySelector('.action-cell');
 
-    // 1. Confirmation visuelle
+    
     actionCell.innerHTML = `
         <span style="color: #10b981; font-weight: 700; display: flex; align-items: center; justify-content: flex-end; gap: 5px;">
             ✅ Candidat Accepté
         </span>
     `;
 
-    // 2. Notification de succès
     alert("La candidature a été acceptée. Un mail de confirmation sera envoyé à l'étudiant.");
     
-    // Ici, vous pourriez plus tard ajouter un appel serveur pour enregistrer ce changement
+    
 };
 
 async function displayAdminDashboard() {
     const container = document.getElementById('admin-etudiants');
-    if (!container) return; // Sécurité si l'élément n'existe pas
-
-    // 1. Injection de la structure HTML (Statique)
+    if (!container) return; 
+    
     container.innerHTML = `
         <div class="page-header">
             <div class="header-text">
@@ -472,12 +470,11 @@ async function displayAdminDashboard() {
     `;
 
     try {
-        // 2. Appel au serveur pour récupérer les vrais étudiants (role='student')
+        
         const response = await fetch('http://localhost:3000/api/admin/students');
         const students = await response.json();
         const tbody = document.getElementById('admin-students-tbody');
 
-        // 3. Remplissage dynamique avec les données de ta table users
         tbody.innerHTML = students.map(st => `
             <tr>
                 <td style="font-weight:600;">${st.full_name}</td>
@@ -505,7 +502,7 @@ async function displayAdminConventions() {
         const conventions = await response.json();
 
         tbody.innerHTML = conventions.map(conv => {
-            // Logique de cohérence : si une note existe, le statut doit être "Signée"
+            
             const isFinished = conv.status === 'Signée' || conv.note !== null;
             const statusColor = isFinished ? '#166534' : '#92400E';
             const statusBg = isFinished ? '#DCFCE7' : '#FEF3C7';
@@ -538,54 +535,47 @@ async function displayAdminConventions() {
     }
 }
 
-// Fonction pour simuler le téléchargement du PDF
 window.downloadPDF = function(fileName) {
-    // Dans une vraie application, cela pointerait vers l'URL du fichier sur le serveur
+    
     alert("Préparation du téléchargement de : " + fileName);
     
-    // Simulation d'un délai de téléchargement
+    
     setTimeout(() => {
         console.log("Fichier " + fileName + " téléchargé.");
     }, 1000);
 };
 
-// Nouvelle fonction pour gérer la signature
 window.signConvention = function(id) {
     const statusBadge = document.getElementById(`status-${id}`);
     const actionCell = statusBadge.parentElement.nextElementSibling;
 
-    // 1. Simulation visuelle de signature
     statusBadge.innerText = "Signée";
     statusBadge.style.background = "#DCFCE7";
     statusBadge.style.color = "#166534";
 
-    // 2. Remplacer le bouton par une confirmation
     actionCell.innerHTML = `<span style="color: #166534; font-weight: 600;">✅ Terminé</span>`;
 
-    // 3. Notification
     alert("La convention a été signée électroniquement avec succès !");
 };
 
 document.addEventListener('click', function(e) {
     if (e.target && e.target.classList.contains('btn-postuler')) {
-        console.log("Clic sur Postuler détecté"); // Pour vérifier dans la console (F12)
+        console.log("Clic sur Postuler détecté"); 
         
         const card = e.target.closest('.offer-card');
         const title = card.querySelector('h3').innerText;
         
-        // On cherche l'offre dans la liste
         const selectedOffer = offers.find(o => o.title === title);
         
         if (selectedOffer) {
-            // 1. On bascule sur la vue candidature
+            
             document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
             document.getElementById('candidature').classList.add('active');
             
-            // 2. On met à jour le menu sidebar
+            
             document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
             document.querySelector('[data-target="candidature"]').classList.add('active');
 
-            // 3. On lance le formulaire avec l'ID réel
             displayCandidatureForm(selectedOffer.id); 
             window.scrollTo({ top: 0, behavior: 'smooth' });
         } else {
@@ -603,7 +593,7 @@ window.updateApplicationStatus = async function(appId, newStatus) {
 
         if (response.ok) {
             alert(`✅ La candidature a été ${newStatus}`);
-            displayReceivedApplications(); // On rafraîchit la liste
+            displayReceivedApplications(); 
         }
     } catch (error) {
         console.error("Erreur mise à jour statut:", error);
@@ -640,7 +630,7 @@ window.signConvention = async function(id) {
 
         if (response.ok) {
             alert("La convention a été signée électroniquement avec succès !");
-            displayAdminConventions(); // Rafraîchit l'affichage
+            displayAdminConventions(); 
         }
     } catch (error) {
         console.error("Erreur signature:", error);
@@ -654,9 +644,9 @@ window.deleteOffer = async function(id) {
             });
             if (response.ok) {
                 alert("🗑️ Offre supprimée !");
-                // On met à jour les données locales et l'affichage
-                offers = offers.filter(off => off.id !== id); // Retire l'offre de la liste en mémoire
-                displayMyOffers(); // Relance l'affichage des offres de l'entreprise
+                
+                offers = offers.filter(off => off.id !== id); 
+                displayMyOffers(); 
             }
         } catch (error) {
             console.error("Erreur suppression:", error);
