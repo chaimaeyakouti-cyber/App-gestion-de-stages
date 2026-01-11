@@ -307,14 +307,18 @@ function displayCompanyForm() {
     // Écouter la soumission du formulaire
     document.getElementById('job-offer-form').addEventListener('submit', async (e) => {
         e.preventDefault();
+        if (!currentUser) {
+            alert("Erreur : session expirée. Veuillez vous reconnecter.");
+            return;
+        }
         
         const newOffer = {
             title: document.getElementById('pub-title').value,
             type: document.getElementById('pub-type').value,
             filiere: document.getElementById('pub-filiere').value,
             description: document.getElementById('pub-desc').value,
-            company_name: document.querySelector('.user-info .name').innerText, // Récupère le nom de l'entreprise connectée
-            company_id: 2 // Pour l'instant on met 2 (OCP) par défaut, on le rendra dynamique avec le login
+            company_name: currentUser.full_name, // Nom dynamique
+            company_id: currentUser.id          // ID dynamique (ex: 8)
         };
 
         try {
@@ -325,11 +329,13 @@ function displayCompanyForm() {
             });
 
             if (response.ok) {
-                alert("Félicitations ! Votre offre a été publiée sur le Hub de l'INPT.");
-                window.location.reload(); // Rafraîchit pour voir l'offre apparaître
+                const result = await response.json();
+                alert("✅ " + result.message); // Affiche "Offre publiée avec succès !"
+                window.location.reload(); 
             }
         } catch (error) {
-            alert("Erreur lors de la publication.");
+            console.error("Erreur publication:", error);
+            alert("Le serveur ne répond pas.");
         }
     });
 }
