@@ -35,7 +35,7 @@ app.get('/api/offers', (req, res) => {
         return res.json(data);
     });
 });
-// Route pour publier une nouvelle offre
+
 app.post('/api/offers', (req, res) => {
     const { title, type, filiere, description, company_name, company_id } = req.body;
     
@@ -49,7 +49,7 @@ app.post('/api/offers', (req, res) => {
         res.json({ message: "Offre publiée avec succès !", id: result.insertId });
     });
 });
-// Route de connexion (Login)
+
 app.post('/api/login', (req, res) => {
     // On extrait l'id et le password
     let { id, password } = req.body;
@@ -101,11 +101,11 @@ app.post('/api/applications', (req, res) => {
         res.json({ success: true, message: "Candidature enregistrée avec succès !" });
     });
 });
-// Route pour récupérer les candidatures reçues par une entreprise spécifique
+
 app.get('/api/applications/company/:companyId', (req, res) => {
     const companyId = req.params.companyId;
     
-    // On utilise AS pour donner des noms simples que le script va reconnaître
+    
     const sql = `
         SELECT 
             a.id AS app_id, 
