@@ -44,8 +44,7 @@ document.querySelectorAll('.nav-link').forEach(link => {
             displayReceivedApplications();
         }
         else if (target === 'admin-etudiants' || target === 'admin-stats') {
-            displayAdminDashboard(); // Affiche le tableau de suivi des étudiants
-            updateAdminStats();      // CHARGE les vrais chiffres (3 étudiants, etc.)
+            displayAdminDashboard();     
         }
         else if (target === 'admin-conventions') {
             displayAdminConventions();
@@ -353,18 +352,17 @@ function displayMyOffers() {
         container.innerHTML = "<p style='color: var(--text-muted);'>Vous n'avez pas encore publié d'offres.</p>";
         return;
     }
-
+    // Dans displayMyOffers, à l'intérieur du .map() :
     container.innerHTML = myPublishedOffers.map(off => `
         <div class="offer-card">
             <span class="badge">${off.type}</span>
             <h3>${off.title}</h3>
-            <p style="color: var(--text-muted); font-size: 0.85rem; margin: 10px 0;">Filière : ${off.filiere}</p>
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 15px; border-top: 1px solid var(--border); padding-top: 15px;">
-                <span style="font-weight: 600; font-size: 0.9rem; color: var(--primary);">Candidats : 0</span>
-                <button onclick="editOffer(${JSON.stringify(off).replace(/"/g, '&quot;')})" class="btn-action-accept" style="background: #10b981; border: none; color: white; padding: 6px 12px; border-radius: 8px; cursor: pointer; font-size: 0.8rem;">Modifier</button>
+            <div style="display: flex; gap: 10px; margin-top: 15px;">
+                <button onclick='deleteOffer(${off.id})' style="background: #ef4444; color: white; border: none; padding: 6px 12px; border-radius: 8px; cursor: pointer;">Supprimer</button>
             </div>
         </div>
     `).join('');
+
 }
 window.editOffer = function(offerData) {
     // 1. On change de vue vers le formulaire de l'entreprise
@@ -648,21 +646,20 @@ window.signConvention = async function(id) {
         console.error("Erreur signature:", error);
     }
 };
-async function updateAdminStats() {
-    try {
-        const response = await fetch('http://localhost:3000/api/admin/stats');
-        const stats = await response.json();
-
-        // On cible les conteneurs de chiffres dans tes cartes (image_3faa8b.png)
-        // Note : Assure-toi que tes éléments HTML ont des IDs ou utilise les sélecteurs suivants
-        const studentsCount = document.querySelector('.stat-card:nth-child(1) h2');
-        const internshipsCount = document.querySelector('.stat-card:nth-child(2) h2');
-        const conventionsCount = document.querySelector('.stat-card:nth-child(3) h2');
-
-        if (studentsCount) studentsCount.innerText = stats.students;
-        if (internshipsCount) internshipsCount.innerText = stats.internships;
-        if (conventionsCount) conventionsCount.innerText = stats.conventions;
-    } catch (error) {
-        console.error("Erreur lors de la mise à jour des stats:", error);
+window.deleteOffer = async function(id) {
+    if (confirm("Voulez-vous vraiment supprimer cette offre ?")) {
+        try {
+            const response = await fetch(`http://localhost:3000/api/offers/${id}`, {
+                method: 'DELETE'
+            });
+            if (response.ok) {
+                alert("🗑️ Offre supprimée !");
+                // On met à jour les données locales et l'affichage
+                offers = offers.filter(off => off.id !== id); // Retire l'offre de la liste en mémoire
+                displayMyOffers(); // Relance l'affichage des offres de l'entreprise
+            }
+        } catch (error) {
+            console.error("Erreur suppression:", error);
+        }
     }
-}
+};
