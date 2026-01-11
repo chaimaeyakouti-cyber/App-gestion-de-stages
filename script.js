@@ -441,10 +441,11 @@ window.acceptApplication = function(appId) {
     // Ici, vous pourriez plus tard ajouter un appel serveur pour enregistrer ce changement
 };
 
-function displayAdminDashboard() {
-    const container = document.getElementById('admin-etudiants'); // Cible la section entière
-    
-    // On injecte les filtres PUIS le tableau
+async function displayAdminDashboard() {
+    const container = document.getElementById('admin-etudiants');
+    if (!container) return; // Sécurité si l'élément n'existe pas
+
+    // 1. Injection de la structure HTML (Statique)
     container.innerHTML = `
         <div class="page-header">
             <div class="header-text">
@@ -454,83 +455,46 @@ function displayAdminDashboard() {
             <div class="header-badge">Académique</div>
         </div>
 
-        <div class="filters" style="margin-bottom: 20px;">
-            <input type="text" id="admin-search" placeholder="🔍 Rechercher un étudiant par nom..." style="flex: 2;">
-            <select id="admin-filter-filiere" style="flex: 1;">
-                <option value="">✨ Toutes les filières</option>
-                <option value="ASEDS">ASEDS</option>
-                <option value="AMOA">AMOA</option>
-                <option value="Cyber">Cybersécurité</option>
-                <option value="Data">Data Engineering</option>
-                <option value="Cloud">Cloud & IoT</option>
-            </select>
-        </div>
-
         <div class="data-card">
             <table class="modern-table">
                 <thead>
                     <tr>
                         <th>Étudiant</th>
                         <th>Filière</th>
-                        <th>Entreprise</th>
-                        <th>Statut</th>
                         <th>Note /20</th>
+                        <th>Action</th>
                     </tr>
                 </thead>
                 <tbody id="admin-students-tbody">
-                    </tbody>
+                    <tr><td colspan="4" style="text-align:center;">Chargement des données...</td></tr>
+                </tbody>
             </table>
         </div>
     `;
 
-    // Insertion des données de test
-    const tbody = document.getElementById('admin-students-tbody');
-    const students = [
-        { name: "Anas Naji", filiere: "ASEDS", company: "Orange", status: "Validé", note: "18" },
-        { name: "Sara Alami", filiere: "Cyber", company: "Thales", status: "En cours", note: "--" },
-        { name: "Mehdi Benani", filiere: "Data", company: "OCP", status: "Validé", note: "17" }
-    ];
+    try {
+        // 2. Appel au serveur pour récupérer les vrais étudiants (role='student')
+        const response = await fetch('http://localhost:3000/api/admin/students');
+        const students = await response.json();
+        const tbody = document.getElementById('admin-students-tbody');
 
-    tbody.innerHTML = students.map(st => `
-        <tr>
-            <td style="font-weight:600;">${st.name}</td>
-            <td><span class="badge-filiere">${st.filiere}</span></td>
-            <td>${st.company}</td>
-            <td><span style="color: ${st.status === 'Validé' ? '#10b981' : '#f59e0b'}">${st.status}</span></td>
-            <td>
-                <input type="number" value="${st.note}" class="modern-input" style="width:70px; padding:5px;">
-            </td>
-        </tr>
-    `).join('');
-    // --- LOGIQUE DE RECHERCHE EN TEMPS RÉEL ---
-    const searchInput = document.getElementById('admin-search');
-    const filterFiliere = document.getElementById('admin-filter-filiere');
-
-    function filterTable() {
-        const searchTerm = searchInput.value.toLowerCase();
-        const filiereTerm = filterFiliere.value.toLowerCase();
-        const rows = document.querySelectorAll('#admin-students-tbody tr');
-
-        rows.forEach(row => {
-            const name = row.querySelector('td:first-child').innerText.toLowerCase();
-            const filiere = row.querySelector('.badge-filiere').innerText.toLowerCase();
-            
-            // On vérifie si le nom ET la filière correspondent
-            const matchesSearch = name.includes(searchTerm);
-            const matchesFiliere = filiereTerm === "" || filiere.includes(filiereTerm);
-
-            if (matchesSearch && matchesFiliere) {
-                row.style.display = ""; // Affiche la ligne
-            } else {
-                row.style.display = "none"; // Cache la ligne
-            }
-        });
+        // 3. Remplissage dynamique avec les données de ta table users
+        tbody.innerHTML = students.map(st => `
+            <tr>
+                <td style="font-weight:600;">${st.full_name}</td>
+                <td><span class="badge-filiere">${st.filiere || 'Non définie'}</span></td>
+                <td>
+                    <input type="number" id="note-${st.id}" min="0" max="20" step="0.25" class="modern-input" style="width:80px;" placeholder="--">
+                </td>
+                <td>
+                    <button onclick="saveGrade(${st.id})" class="btn-action-accept" style="padding: 6px 12px;">Enregistrer</button>
+                </td>
+            </tr>
+        `).join('');
+    } catch (error) {
+        console.error("Erreur lors du chargement des étudiants:", error);
+        document.getElementById('admin-students-tbody').innerHTML = `<tr><td colspan="4" style="color:red; text-align:center;">Erreur de connexion au serveur</td></tr>`;
     }
-
-    // Écouter la saisie dans la barre de recherche
-    searchInput.addEventListener('input', filterTable);
-    // Écouter le changement dans le menu des filières
-    filterFiliere.addEventListener('change', filterTable);
 }
 
 function displayAdminConventions() {
@@ -636,5 +600,28 @@ window.updateApplicationStatus = async function(appId, newStatus) {
         }
     } catch (error) {
         console.error("Erreur mise à jour statut:", error);
+    }
+};
+window.saveGrade = async function(studentId) {
+    const noteInput = document.getElementById(`note-${studentId}`);
+    const noteValue = noteInput.value;
+
+    if (noteValue === "") {
+        alert("Veuillez saisir une note avant d'enregistrer.");
+        return;
+    }
+
+    try {
+        const response = await fetch(`http://localhost:3000/api/admin/save-grade`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ studentId, note: noteValue })
+        });
+
+        if (response.ok) {
+            alert("✅ Note enregistrée avec succès dans la table conventions !");
+        }
+    } catch (error) {
+        console.error("Erreur enregistrement note:", error);
     }
 };

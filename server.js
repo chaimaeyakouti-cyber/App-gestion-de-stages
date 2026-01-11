@@ -138,6 +138,28 @@ app.put('/api/applications/:id/status', (req, res) => {
         res.json({ success: true, message: `Statut mis à jour : ${status}` });
     });
 });
+// Route pour récupérer tous les étudiants (Admin)
+app.get('/api/admin/students', (req, res) => {
+    // On ne sélectionne que les utilisateurs ayant le rôle 'student'
+    const sql = "SELECT id, full_name, filiere FROM users WHERE role = 'student'";
+    
+    db.query(sql, (err, results) => {
+        if (err) {
+            console.error("Erreur SQL Admin:", err);
+            return res.status(500).json(err);
+        }
+        res.json(results);
+    });
+});
+app.put('/api/admin/save-grade', (req, res) => {
+    const { studentId, note } = req.body;
+    const sql = "UPDATE conventions SET note = ? WHERE student_id = ?";
+    
+    db.query(sql, [note, studentId], (err, result) => {
+        if (err) return res.status(500).json(err);
+        res.json({ success: true, message: "Note mise à jour !" });
+    });
+});
 
 // 5. Lancement du serveur sur le port 3000
 app.listen(3000, () => {
