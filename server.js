@@ -180,6 +180,22 @@ app.put('/api/admin/sign-convention/:id', (req, res) => {
         res.json({ success: true, message: "Convention signée !" });
     });
 });
+app.get('/api/admin/stats', (req, res) => {
+    const queries = {
+        totalStudents: "SELECT COUNT(*) AS count FROM users WHERE role = 'student'",
+        totalInternships: "SELECT COUNT(*) AS count FROM applications WHERE status = 'Acceptée'",
+        pendingConventions: "SELECT COUNT(*) AS count FROM conventions WHERE status = 'En attente'"
+    };
+
+    // Exécution de plusieurs requêtes SQL en parallèle
+    Promise.all([
+        new Promise((resolve, reject) => db.query(queries.totalStudents, (err, r) => err ? reject(err) : resolve(r[0].count))),
+        new Promise((resolve, reject) => db.query(queries.totalInternships, (err, r) => err ? reject(err) : resolve(r[0].count))),
+        new Promise((resolve, reject) => db.query(queries.pendingConventions, (err, r) => err ? reject(err) : resolve(r[0].count)))
+    ]).then(([students, internships, conventions]) => {
+        res.json({ students, internships, conventions });
+    }).catch(err => res.status(500).json(err));
+});
 
 // 5. Lancement du serveur sur le port 3000
 app.listen(3000, () => {

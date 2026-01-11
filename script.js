@@ -44,7 +44,8 @@ document.querySelectorAll('.nav-link').forEach(link => {
             displayReceivedApplications();
         }
         else if (target === 'admin-etudiants' || target === 'admin-stats') {
-            displayAdminDashboard();
+            displayAdminDashboard(); // Affiche le tableau de suivi des étudiants
+            updateAdminStats();      // CHARGE les vrais chiffres (3 étudiants, etc.)
         }
         else if (target === 'admin-conventions') {
             displayAdminConventions();
@@ -647,3 +648,21 @@ window.signConvention = async function(id) {
         console.error("Erreur signature:", error);
     }
 };
+async function updateAdminStats() {
+    try {
+        const response = await fetch('http://localhost:3000/api/admin/stats');
+        const stats = await response.json();
+
+        // On cible les conteneurs de chiffres dans tes cartes (image_3faa8b.png)
+        // Note : Assure-toi que tes éléments HTML ont des IDs ou utilise les sélecteurs suivants
+        const studentsCount = document.querySelector('.stat-card:nth-child(1) h2');
+        const internshipsCount = document.querySelector('.stat-card:nth-child(2) h2');
+        const conventionsCount = document.querySelector('.stat-card:nth-child(3) h2');
+
+        if (studentsCount) studentsCount.innerText = stats.students;
+        if (internshipsCount) internshipsCount.innerText = stats.internships;
+        if (conventionsCount) conventionsCount.innerText = stats.conventions;
+    } catch (error) {
+        console.error("Erreur lors de la mise à jour des stats:", error);
+    }
+}
