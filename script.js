@@ -497,38 +497,46 @@ async function displayAdminDashboard() {
     }
 }
 
-function displayAdminConventions() {
+async function displayAdminConventions() {
     const tbody = document.getElementById('admin-conventions-tbody');
-    
-    const conventions = [
-        { id: 1, student: "Anas Naji", company: "Orange Business", file: "convention_naji.pdf", status: "En attente" },
-        { id: 2, student: "Sara Alami", company: "Thales", file: "convention_alami.pdf", status: "Signée" },
-        { id: 3, student: "Mehdi Benani", company: "OCP Group", file: "convention_benani.pdf", status: "En attente" }
-    ];
+    if (!tbody) return;
 
-    tbody.innerHTML = conventions.map(conv => `
-        <tr>
-            <td style="font-weight:600;">${conv.student}</td>
-            <td>${conv.company}</td>
-            <td>
-                <span onclick="downloadPDF('${conv.file}')" style="cursor:pointer; color:#7c3aed; font-weight: 500; display: flex; align-items: center; gap: 5px;">
-                    📄 ${conv.file}
-                </span>
-            </td>
-            <td>
-                <span id="status-${conv.id}" class="badge-filiere" style="background: ${conv.status === 'Signée' ? '#DCFCE7' : '#FEF3C7'}; 
-                color: ${conv.status === 'Signée' ? '#166534' : '#92400E'};">
-                    ${conv.status}
-                </span>
-            </td>
-            <td style="text-align: right;">
-                ${conv.status === 'En attente' ? 
-                    `<button class="btn-action-accept" onclick="signConvention(${conv.id})" style="padding: 6px 12px; font-size: 0.8rem;">Signer</button>` : 
-                    `<span style="color: #166534; font-weight: 600;">✅ Terminé</span>`
-                }
-            </td>
-        </tr>
-    `).join('');
+    try {
+        const response = await fetch('http://localhost:3000/api/admin/conventions');
+        const conventions = await response.json();
+
+        tbody.innerHTML = conventions.map(conv => {
+            // Logique de cohérence : si une note existe, le statut doit être "Signée"
+            const isFinished = conv.status === 'Signée' || conv.note !== null;
+            const statusColor = isFinished ? '#166534' : '#92400E';
+            const statusBg = isFinished ? '#DCFCE7' : '#FEF3C7';
+
+            return `
+                <tr>
+                    <td style="font-weight:600;">${conv.student_name}</td>
+                    <td>${conv.company_name}</td>
+                    <td>
+                        <span onclick="downloadPDF('${conv.file_path}')" style="cursor:pointer; color:#7c3aed; font-weight: 500;">
+                            📄 ${conv.file_path}
+                        </span>
+                    </td>
+                    <td>
+                        <span id="status-${conv.id}" class="badge-filiere" style="background: ${statusBg}; color: ${statusColor};">
+                            ${isFinished ? 'Signée' : conv.status}
+                        </span>
+                    </td>
+                    <td style="text-align: right;">
+                        ${!isFinished ? 
+                            `<button class="btn-action-accept" onclick="signConvention(${conv.id})" style="padding: 6px 12px; font-size: 0.8rem;">Signer</button>` : 
+                            `<span style="color: #166534; font-weight: 600;">✅ Validée</span>`
+                        }
+                    </td>
+                </tr>
+            `;
+        }).join('');
+    } catch (error) {
+        console.error("Erreur conventions:", error);
+    }
 }
 
 // Fonction pour simuler le téléchargement du PDF
@@ -623,5 +631,19 @@ window.saveGrade = async function(studentId) {
         }
     } catch (error) {
         console.error("Erreur enregistrement note:", error);
+    }
+};
+window.signConvention = async function(id) {
+    try {
+        const response = await fetch(`http://localhost:3000/api/admin/sign-convention/${id}`, {
+            method: 'PUT'
+        });
+
+        if (response.ok) {
+            alert("La convention a été signée électroniquement avec succès !");
+            displayAdminConventions(); // Rafraîchit l'affichage
+        }
+    } catch (error) {
+        console.error("Erreur signature:", error);
     }
 };

@@ -160,6 +160,26 @@ app.put('/api/admin/save-grade', (req, res) => {
         res.json({ success: true, message: "Note mise à jour !" });
     });
 });
+app.get('/api/admin/conventions', (req, res) => {
+    const sql = `
+        SELECT c.id, u.full_name AS student_name, c.company_name, c.file_path, c.status, c.note 
+        FROM conventions c
+        JOIN users u ON c.student_id = u.id`;
+    
+    db.query(sql, (err, results) => {
+        if (err) return res.status(500).json(err);
+        res.json(results);
+    });
+});
+app.put('/api/admin/sign-convention/:id', (req, res) => {
+    const convId = req.params.id;
+    const sql = "UPDATE conventions SET status = 'Signée', signed_at = NOW() WHERE id = ?";
+    
+    db.query(sql, [convId], (err, result) => {
+        if (err) return res.status(500).json(err);
+        res.json({ success: true, message: "Convention signée !" });
+    });
+});
 
 // 5. Lancement du serveur sur le port 3000
 app.listen(3000, () => {
