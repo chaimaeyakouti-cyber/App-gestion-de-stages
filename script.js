@@ -415,12 +415,8 @@ async function displayReceivedApplications() {
                 <td>${app.offer_title}</td>
                 <td>${new Date(app.app_date).toLocaleDateString('fr-FR')}</td>
                 <td style="text-align: right;" class="action-cell">
-                    <button class="btn-action-accept" style="background: #10b981; color: white; border: none; padding: 6px 12px; border-radius: 8px; cursor: pointer; font-weight: 600;">
-                        Accepter
-                    </button>
-                    <button class="btn-action-reject" style="background: #ef4444; color: white; border: none; padding: 6px 12px; border-radius: 8px; cursor: pointer; font-weight: 600; margin-left: 5px;">
-                        Refuser
-                    </button>
+                    <button onclick="updateApplicationStatus(${app.app_id}, 'Acceptée')" class="btn-action-accept">Accepter</button>
+                    <button onclick="updateApplicationStatus(${app.app_id}, 'Refusée')" class="btn-action-reject" style="margin-left:5px;">Refuser</button>
                 </td>
             </tr>
         `).join('');
@@ -626,3 +622,19 @@ document.addEventListener('click', function(e) {
         }
     }
 });
+window.updateApplicationStatus = async function(appId, newStatus) {
+    try {
+        const response = await fetch(`http://localhost:3000/api/applications/${appId}/status`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ status: newStatus })
+        });
+
+        if (response.ok) {
+            alert(`✅ La candidature a été ${newStatus}`);
+            displayReceivedApplications(); // On rafraîchit la liste
+        }
+    } catch (error) {
+        console.error("Erreur mise à jour statut:", error);
+    }
+};

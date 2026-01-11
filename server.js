@@ -108,6 +108,7 @@ app.get('/api/applications/company/:companyId', (req, res) => {
     // On utilise AS pour donner des noms simples que le script va reconnaître
     const sql = `
         SELECT 
+            a.id AS app_id, 
             u.full_name AS student_name, 
             u.filiere AS student_filiere, 
             o.title AS offer_title, 
@@ -122,6 +123,22 @@ app.get('/api/applications/company/:companyId', (req, res) => {
         res.json(results);
     });
 });
+// Route pour mettre à jour le statut d'une candidature
+app.put('/api/applications/:id/status', (req, res) => {
+    const appId = req.params.id;
+    const { status } = req.body; // 'Acceptée' ou 'Refusée'
+
+    const sql = "UPDATE applications SET status = ? WHERE id = ?";
+    
+    db.query(sql, [status, appId], (err, result) => {
+        if (err) {
+            console.error("Erreur SQL lors de la mise à jour :", err);
+            return res.status(500).json(err);
+        }
+        res.json({ success: true, message: `Statut mis à jour : ${status}` });
+    });
+});
+
 // 5. Lancement du serveur sur le port 3000
 app.listen(3000, () => {
     console.log('Serveur en attente sur http://localhost:3000');
